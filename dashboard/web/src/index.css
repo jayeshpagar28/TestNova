@@ -1,0 +1,269 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/outfit';
+
+/*
+ * TestNova design tokens — taken from the reference shots (UI-data/), then tuned where the
+ * chart colours failed the dataviz validator on the dark surface (see src/theme.ts).
+ */
+@theme {
+  --font-sans: 'Outfit Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-page: #0f1013;
+  --color-panel: #16171b;
+  --color-card: #1a1b1f;
+  --color-card-2: #1f2026;
+  --color-raised: #26272e;
+  --color-line: rgb(255 255 255 / 0.07);
+  --color-line-2: rgb(255 255 255 / 0.12);
+
+  --color-ink: #eeeef1;
+  --color-ink-2: #a4a7b0;
+  --color-ink-3: #6f727c;
+
+  --color-electric: #2f7bff;
+  --color-lilac: #a99cff;
+
+  /* status: delta pills and badges, as in the reference's green/red pills */
+  --color-good: #43c065;
+  --color-bad: #ef5a68;
+  --color-warn: #d9a441;
+
+  /* series: execution status (validated, dark surface) */
+  --color-passed: #1e9e9a;
+  --color-failed: #d9536f;
+  --color-notrun: #7b6ae6;
+  --color-blocked: #b5832f;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* thin dark scrollbars, as in the reference's panels */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.12) transparent;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Purple light in the top-right corner of a card, plus the faint star speckle of the KPI cards. */
+.glow-card {
+  background:
+    radial-gradient(120% 90% at 92% -10%, rgb(123 106 230 / 0.32), transparent 55%),
+    radial-gradient(1px 1px at 20% 30%, rgb(255 255 255 / 0.18), transparent 60%),
+    radial-gradient(1px 1px at 70% 65%, rgb(255 255 255 / 0.12), transparent 60%),
+    radial-gradient(1px 1px at 45% 85%, rgb(255 255 255 / 0.1), transparent 60%),
+    var(--color-card);
+}
+
+/* The dotted "mountain" behind the Market Leaders panel. */
+.dot-mountain {
+  background-image: radial-gradient(rgb(255 255 255 / 0.16) 0.8px, transparent 1.2px);
+  background-size: 5px 5px;
+  mask-image: radial-gradient(55% 95% at 50% 100%, #000 0%, rgb(0 0 0 / 0.5) 45%, transparent 75%);
+}
+
+/* Light sweep across the node card in the regression flow. */
+@keyframes sweep {
+  0% { transform: translateX(-120%) skewX(-18deg); }
+  60%, 100% { transform: translateX(260%) skewX(-18deg); }
+}
+.shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, rgb(120 170 255 / 0.55), transparent);
+  animation: sweep 3.6s cubic-bezier(0.4, 0, 0.2, 1) 1.4s infinite;
+  pointer-events: none;
+}
+
+/* Slow drift of the CTA card's gradient. */
+@keyframes drift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.cta-gradient {
+  background:
+    radial-gradient(80% 60% at 30% 110%, rgb(74 98 255 / 0.85), transparent 70%),
+    radial-gradient(70% 60% at 100% 0%, rgb(169 156 255 / 0.35), transparent 70%),
+    linear-gradient(135deg, #20222c, #2b2f55, #1d2140, #2a2a4a);
+  background-size: 200% 200%;
+  animation: drift 14s ease-in-out infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0.35; }
+}
+.live-dot {
+  animation: blink 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shine::after,
+  .cta-gradient,
+  .live-dot {
+    animation: none;
+  }
+}
+
+/* Intro tagline accent words: the lilac → electric gradient, with a light passing through. */
+@keyframes accent-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: -100% 50%; }
+}
+.intro-accent {
+  background: linear-gradient(100deg, #a99cff 0%, #8fb4ff 35%, #ffffff 50%, #8fb4ff 65%, #2f7bff 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: accent-shimmer 3.2s ease-in-out 2.2s infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-accent { animation: none; background-position: 50% 50%; }
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * Light theme. Everything below applies only with data-theme="light" on <html>
+ * (set by the theme button); the dark theme above is the default and is never
+ * changed by these rules.
+ * ─────────────────────────────────────────────────────────────────────────── */
+html[data-theme='light'] {
+  color-scheme: light;
+  --color-page: #eef0f5;
+  --color-panel: #ffffff;
+  --color-card: #ffffff;
+  --color-card-2: #f5f6fa;
+  --color-raised: #ffffff;
+  --color-line: rgb(20 22 30 / 0.09);
+  --color-line-2: rgb(20 22 30 / 0.16);
+
+  --color-ink: #15161b;
+  --color-ink-2: #545866;
+  --color-ink-3: #80848f;
+
+  --color-electric: #2563eb;
+  --color-lilac: #6c5ce7;
+
+  --color-good: #1f8a45;
+  --color-bad: #d23a4b;
+  --color-warn: #a86f12;
+
+  /* The dark theme uses white for faint tints and its primary buttons; in light the same
+     utilities become dark tints and dark buttons. Their text is flipped below. */
+  --color-white: #15161b;
+}
+
+/* Parts that stay dark in both themes: the intro and the "Run the full regression" card. */
+html[data-theme='light'] .keep-dark {
+  color-scheme: dark;
+  --color-page: #0f1013;
+  --color-panel: #16171b;
+  --color-card: #1a1b1f;
+  --color-line: rgb(255 255 255 / 0.07);
+  --color-line-2: rgb(255 255 255 / 0.12);
+  --color-ink: #eeeef1;
+  --color-ink-2: #a4a7b0;
+  --color-ink-3: #6f727c;
+  --color-electric: #2f7bff;
+  --color-lilac: #a99cff;
+  --color-white: #fff;
+  color: var(--color-ink);
+}
+
+html[data-theme='light'] * {
+  scrollbar-color: rgb(20 22 30 / 0.18) transparent;
+}
+
+/* Text on the (now dark) primary buttons. */
+html[data-theme='light'] .text-\[\#111\],
+html[data-theme='light'] .hover\:text-\[\#111\]:hover {
+  color: #fff;
+}
+html[data-theme='light'] .keep-dark .text-\[\#111\] {
+  color: #111;
+}
+
+/* Cards: a softer violet light, no star speckle, a gentle shadow instead. */
+html[data-theme='light'] .glow-card {
+  background: radial-gradient(120% 90% at 92% -10%, rgb(123 106 230 / 0.14), transparent 55%), var(--color-card);
+}
+html[data-theme='light'] .bg-card,
+html[data-theme='light'] .glow-card {
+  box-shadow: 0 1px 2px rgb(20 22 30 / 0.04), 0 8px 24px -12px rgb(20 22 30 / 0.12);
+}
+html[data-theme='light'] .dot-mountain {
+  background-image: radial-gradient(rgb(20 22 30 / 0.12) 0.8px, transparent 1.2px);
+}
+
+/* Fixed dark fills: tooltips, the regression node card, timeline dots. */
+html[data-theme='light'] .bg-\[\#202128\]\/95 {
+  background-color: rgb(255 255 255 / 0.97);
+}
+html[data-theme='light'] .bg-\[\#14161c\] {
+  background-color: #f3f6ff;
+}
+html[data-theme='light'] .bg-\[\#2a2b33\] {
+  background-color: #ffffff;
+  border-color: rgb(20 22 30 / 0.25);
+}
+html[data-theme='light'] .text-\[\#8fb4ff\] {
+  color: var(--color-electric);
+}
+html[data-theme='light'] .text-white {
+  color: var(--color-ink);
+}
+
+/* Chart chrome drawn with SVG attributes: grid lines, rings, centre discs, idle lines. */
+html[data-theme='light'] [stroke='rgb(255 255 255 / 0.05)'],
+html[data-theme='light'] [stroke='rgb(255 255 255 / 0.06)'] {
+  stroke: rgb(20 22 30 / 0.08);
+}
+html[data-theme='light'] [fill='rgb(255 255 255 / 0.05)'] {
+  fill: rgb(20 22 30 / 0.05);
+}
+html[data-theme='light'] [fill='#1a1b1f'] {
+  fill: var(--color-card);
+}
+html[data-theme='light'] [fill='#2b2d36'] {
+  fill: #d5d8e2;
+}
+html[data-theme='light'] [fill='#cfd3ea'] {
+  fill: #9aa0b4;
+}
+html[data-theme='light'] [stop-color='rgb(200 210 255 / 0.55)'] {
+  stop-color: rgb(70 80 130 / 0.5);
+}
+html[data-theme='light'] [stop-color='rgb(200 205 230 / 0.28)'] {
+  stop-color: rgb(70 80 130 / 0.25);
+}
+
+/* The KPI cards' pale lavender glyphs, in the violet the light cards carry. */
+html[data-theme='light'] [stroke='#d9d6ff'],
+html[data-theme='light'] [stroke='#e6e3ff'] {
+  stroke: #7b6ae6;
+}
+html[data-theme='light'] [fill='#eceaff'],
+html[data-theme='light'] [fill='#e6e3ff'] {
+  fill: #7b6ae6;
+}
+html[data-theme='light'] [stop-color='#d9d6ff'] {
+  stop-color: #b3a8f5;
+}

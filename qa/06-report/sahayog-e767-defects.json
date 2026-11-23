@@ -1,0 +1,532 @@
+{
+  "project": "sahayog-e767",
+  "generatedAt": "2026-11-04T12:03:44.872Z",
+  "defects": [
+    {
+      "date": "2026-11-04",
+      "instance": "QA",
+      "status": "New",
+      "classification": "app-defect",
+      "tests": [
+        "TC-LOGIN-007",
+        "TC-LOGIN-008"
+      ],
+      "executions": [
+        "EX-20261104-112238"
+      ],
+      "id": "DEF-001",
+      "module": "login",
+      "title": "Login reveals which User Ids exist (different message for wrong password)",
+      "description": "BUG-001 (stage 4) reproduced in automation. For a valid User Id with a wrong password the login toast reads \"The password you entered is incorrect\" (POST /sahyogUserManagementAPI/oauth2/token → 400). An unknown User Id gives \"The credentials you entered are incorrect\". The difference lets an attacker enumerate valid accounts.",
+      "testData": "Role: User; Chromium (Playwright build), desktop 1280x720 unless stated; URL https://sahyogagentweb.drutam.in:9634; logged in as the User role (no credential recorded). Needs one valid User Id and one unknown User Id; wrong password for both.",
+      "priority": "High",
+      "severity": "Major",
+      "type": "Security",
+      "signal": "assertion",
+      "evidence": [
+        "dashboard/data/runs/EX-20261104-112238/evidence/7-0-0-screenshot.png",
+        "dashboard/data/runs/EX-20261104-112238/evidence/9-0-0-screenshot.png",
+        "qa/04-exploratory/evidence/login/BUG-001_400_user-enumeration-toast.png"
+      ],
+      "steps": [
+        "1. Open /login.",
+        "2. Enter a valid User Id and a wrong password; click Login.",
+        "3. Note the toast text.",
+        "4. Repeat with an unknown User Id.",
+        "5. Compare the two messages."
+      ],
+      "expected": "Both cases show the same generic message \"The credentials you entered are incorrect\".",
+      "actual": "Valid User Id + wrong password shows \"The password you entered is incorrect\"; unknown User Id shows the generic message.",
+      "provisional": [
+        "BUG-001"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "instance": "QA",
+      "status": "New",
+      "classification": "app-defect",
+      "tests": [
+        "TC-HOME-030",
+        "TC-LOGIN-037",
+        "TC-LOGIN-032"
+      ],
+      "executions": [
+        "EX-20261104-113334",
+        "EX-20261104-112238"
+      ],
+      "id": "DEF-002",
+      "module": "login",
+      "title": "Keyboard users cannot reach Forgot links, password toggle, nav items, tabs, avatar or bell",
+      "description": "BUG-002 (stage 4). Forgot User ID / Forgot Password / Activate Account are <a> elements without href; the password toggle has tabindex -1; on Home, Tab cycles only between \"Savings Application\" and the sidebar toggle. Nav items (li/div without role), tabs, avatar, bell and View All never receive focus. Automation TC-HOME-030 fails on the keyboard assertion; TC-LOGIN-037 and TC-LOGIN-032 failed in manual testing.",
+      "testData": "Role: User; Chromium (Playwright build), desktop 1280x720 unless stated; URL https://sahyogagentweb.drutam.in:9634; logged in as the User role (no credential recorded). Keyboard only, no mouse.",
+      "priority": "High",
+      "severity": "Major",
+      "type": "Accessibility",
+      "signal": "assertion",
+      "evidence": [
+        "dashboard/data/runs/EX-20261104-113334/evidence/31-0-0-screenshot.png"
+      ],
+      "steps": [
+        "1. Open /login and press Tab repeatedly: only User Id, Password and Login are reached.",
+        "2. Sign in; on /HOME press Tab repeatedly.",
+        "3. Watch which elements receive focus."
+      ],
+      "expected": "All interactive elements (links, toggle, nav, tabs, avatar, bell) are reachable and operable by keyboard.",
+      "actual": "Focus cycles only between Savings Application and the sidebar toggle; the other controls are skipped.",
+      "provisional": [
+        "BUG-002"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "instance": "QA",
+      "status": "New",
+      "classification": "app-defect",
+      "tests": [
+        "TC-LOGIN-012",
+        "TC-LOGIN-039"
+      ],
+      "executions": [
+        "EX-20261104-112238"
+      ],
+      "id": "DEF-003",
+      "module": "login",
+      "title": "Login: password toggle has no accessible name; validation error not tied to the field",
+      "description": "BUG-008 (login part). The password visibility toggle is a plain div with an empty accessible name (TC-LOGIN-012: received \"\"). The inline \"Enter User Id\" error is not linked to the input, so the User Id input has no accessible description (TC-LOGIN-039).",
+      "testData": "Role: User; Chromium (Playwright build), desktop 1280x720 unless stated; URL https://sahyogagentweb.drutam.in:9634; logged in as the User role (no credential recorded). Submit with User Id empty to see the inline error.",
+      "priority": "Medium",
+      "severity": "Minor",
+      "type": "Accessibility",
+      "signal": "assertion",
+      "evidence": [
+        "dashboard/data/runs/EX-20261104-112238/evidence/14-0-0-screenshot.png",
+        "dashboard/data/runs/EX-20261104-112238/evidence/36-0-0-screenshot.png"
+      ],
+      "steps": [
+        "1. Open /login.",
+        "2. Inspect the eye icon next to Password: no role, no name.",
+        "3. Click Login with User Id empty; inspect the User Id input for aria-describedby / aria-invalid."
+      ],
+      "expected": "Toggle is a named button; the error is associated with the field.",
+      "actual": "Toggle has an empty name; no association between error and input.",
+      "provisional": [
+        "BUG-008"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "instance": "QA",
+      "status": "New",
+      "classification": "app-defect",
+      "tests": [
+        "TC-HOME-031",
+        "TC-ABOUT-015",
+        "TC-PROFILE-027",
+        "TC-NOTIF-034"
+      ],
+      "executions": [
+        "EX-20261104-113334",
+        "EX-20261104-115909",
+        "EX-20261104-114312",
+        "EX-20261104-115503"
+      ],
+      "id": "DEF-004",
+      "module": "home",
+      "title": "Critical axe violations on every signed-in page: aria-allowed-attr and button-name",
+      "description": "BUG-008. axe-core reports aria-allowed-attr (critical) and button-name (critical, unnamed buttons such as the sidebar toggle) on Home, About Us, My Profile and Notifications. The set is identical on each page, so the cause is the shared layout. 8 scans (2 attempts per test) across 4 tests.",
+      "testData": "Role: User; Chromium desktop; signed in; axe-core scan of the page; same violations on every page, so the problem is in the shared shell.",
+      "priority": "High",
+      "severity": "Critical",
+      "type": "Accessibility",
+      "signal": "a11y",
+      "evidence": [
+        "dashboard/data/runs/EX-20261104-113334/evidence/33-0-0-a11y-home.json",
+        "dashboard/data/runs/EX-20261104-115909/evidence/16-0-0-a11y-about-us.json",
+        "dashboard/data/runs/EX-20261104-114312/evidence/28-0-0-a11y-my-profile.json",
+        "dashboard/data/runs/EX-20261104-115503/evidence/35-0-0-a11y-notifications.json"
+      ],
+      "steps": [
+        "1. Sign in as the User role.",
+        "2. Open /HOME, /ABOUT_US, /MY_PROFILE, /NOTIFICATIONS in turn.",
+        "3. Run an axe scan on each."
+      ],
+      "expected": "No critical or serious axe violations.",
+      "actual": "aria-allowed-attr and button-name (critical) on all four pages.",
+      "provisional": [
+        "BUG-008"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "instance": "QA",
+      "status": "New",
+      "classification": "app-defect",
+      "tests": [
+        "TC-HOME-031",
+        "TC-ABOUT-015",
+        "TC-PROFILE-027",
+        "TC-NOTIF-034"
+      ],
+      "executions": [
+        "EX-20261104-113334",
+        "EX-20261104-115909",
+        "EX-20261104-114312",
+        "EX-20261104-115503"
+      ],
+      "id": "DEF-005",
+      "module": "home",
+      "title": "Serious axe violation on every signed-in page: color-contrast (e.g. inactive tab text)",
+      "description": "BUG-008. axe-core reports color-contrast (serious) on Home, About Us, My Profile and Notifications; the stage 4 review noted the low-contrast inactive tab as one source.",
+      "testData": "Role: User; Chromium desktop; signed in; axe-core scan of the page; same violations on every page, so the problem is in the shared shell.",
+      "priority": "Medium",
+      "severity": "Major",
+      "type": "Accessibility",
+      "signal": "a11y",
+      "evidence": [
+        "dashboard/data/runs/EX-20261104-113334/evidence/33-0-0-a11y-home.json",
+        "dashboard/data/runs/EX-20261104-115909/evidence/16-0-0-a11y-about-us.json",
+        "dashboard/data/runs/EX-20261104-114312/evidence/28-0-0-a11y-my-profile.json",
+        "dashboard/data/runs/EX-20261104-115503/evidence/35-0-0-a11y-notifications.json"
+      ],
+      "steps": [
+        "1. Sign in.",
+        "2. Open each page and run an axe scan; read the color-contrast result."
+      ],
+      "expected": "Text meets WCAG AA contrast.",
+      "actual": "color-contrast serious violation on all four pages.",
+      "provisional": [
+        "BUG-008"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "instance": "QA",
+      "status": "New",
+      "classification": "app-defect",
+      "tests": [
+        "TC-NOTIF-034"
+      ],
+      "executions": [
+        "EX-20261104-115503"
+      ],
+      "id": "DEF-006",
+      "module": "notifications",
+      "title": "Notifications page: unlabelled form control, invalid list structure, ARIA command without name",
+      "description": "BUG-008 (notifications part). In addition to the shared violations, axe reports label (critical), aria-command-name (serious) and list (serious) on /NOTIFICATIONS. Mark All as Read and the tabs are plain text/divs rather than buttons/tabs.",
+      "testData": "Role: User; Chromium desktop; signed in; axe-core scan of the page; same violations on every page, so the problem is in the shared shell.",
+      "priority": "High",
+      "severity": "Critical",
+      "type": "Accessibility",
+      "signal": "a11y",
+      "evidence": [
+        "dashboard/data/runs/EX-20261104-115503/evidence/35-0-0-a11y-notifications.json",
+        "qa/04-exploratory/evidence/notifications/US002_AC-NOTIF-01_unread-tab.png"
+      ],
+      "steps": [
+        "1. Sign in and open Notifications.",
+        "2. Run an axe scan; see label, aria-command-name, list results."
+      ],
+      "expected": "Controls named and list markup valid.",
+      "actual": "label (critical), aria-command-name and list (serious) reported.",
+      "provisional": [
+        "BUG-008"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "instance": "QA",
+      "status": "New",
+      "classification": "app-defect",
+      "tests": [
+        "TC-HOME-030"
+      ],
+      "executions": [
+        "EX-20261104-113334"
+      ],
+      "id": "DEF-007",
+      "module": "home",
+      "title": "Escape does not close the avatar menu",
+      "description": "BUG-003 (stage 4, manual only; the automated assertion in TC-HOME-030 stops at the earlier keyboard failure, so Escape was not independently reached).",
+      "testData": "Role: User; Chromium (Playwright build), desktop 1280x720 unless stated; URL https://sahyogagentweb.drutam.in:9634; logged in as the User role (no credential recorded). Desktop.",
+      "priority": "Low",
+      "severity": "Minor",
+      "type": "Functional",
+      "signal": "assertion",
+      "evidence": [
+        "qa/04-exploratory/evidence/home/US002_AC-HOME-02_avatar-menu.png"
+      ],
+      "steps": [
+        "1. Sign in, open /HOME.",
+        "2. Click the avatar to open the menu.",
+        "3. Press Escape."
+      ],
+      "expected": "Menu closes.",
+      "actual": "Menu stays open.",
+      "provisional": [
+        "BUG-003"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "instance": "QA",
+      "status": "New",
+      "classification": "app-defect",
+      "tests": [],
+      "executions": [],
+      "id": "DEF-008",
+      "module": "home",
+      "title": "Alerts badge missing after a full page load of other pages",
+      "description": "BUG-004 (stage 4, manual only; not covered by an automated assertion). The Alerts badge shows on Home (count equals alert count) but is empty after a direct load of /NOTIFICATIONS or /ABOUT_US.",
+      "testData": "Role: User; Chromium (Playwright build), desktop 1280x720 unless stated; URL https://sahyogagentweb.drutam.in:9634; logged in as the User role (no credential recorded). Direct URL load.",
+      "priority": "Low",
+      "severity": "Minor",
+      "type": "UI",
+      "signal": "assertion",
+      "evidence": [
+        "qa/04-exploratory/home-results.md (TC-HOME-013)"
+      ],
+      "steps": [
+        "1. Sign in; note the Alerts badge on Home.",
+        "2. Load /NOTIFICATIONS directly (browser reload).",
+        "3. Look at the Alerts badge."
+      ],
+      "expected": "Badge shows the same count on every page.",
+      "actual": "Badge is empty.",
+      "provisional": [
+        "BUG-004"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "instance": "QA",
+      "status": "New",
+      "classification": "app-defect",
+      "tests": [
+        "TC-LOGIN-024",
+        "TC-NOTIF-027"
+      ],
+      "executions": [
+        "EX-20261104-112238",
+        "EX-20261104-115503"
+      ],
+      "id": "DEF-009",
+      "module": "login",
+      "title": "Expired session redirects to /login with the toast \"Success: Logout Successfully\"",
+      "description": "BUG-005 (stage 4, manual only). After the session/token is cleared, the next list call returns 401 (POST /sahyogAosAPI/aos/alert/get/list and /sahyogUserManagementAPI/admin/sidemenu/list) and the app redirects to /login. The user is shown a success toast for a logout they did not do. No raw 401 is shown. Automation tests TC-LOGIN-024 / TC-NOTIF-027 check the redirect and pass, so this wording is not asserted.",
+      "testData": "Role: User; Chromium (Playwright build), desktop 1280x720 unless stated; URL https://sahyogagentweb.drutam.in:9634; logged in as the User role (no credential recorded). Clear localStorage on a signed-in page, then click Next/navigate.",
+      "priority": "Low",
+      "severity": "Minor",
+      "type": "Functional",
+      "signal": "http-4xx",
+      "evidence": [
+        "qa/04-exploratory/login-results.md (TC-LOGIN-024)",
+        "qa/04-exploratory/notifications-results.md (TC-NOTIF-027)"
+      ],
+      "steps": [
+        "1. Sign in and open Notifications.",
+        "2. Clear localStorage.",
+        "3. Click Next."
+      ],
+      "expected": "Redirect to /login with a \"session expired\" message.",
+      "actual": "Redirect with toast \"Success: Logout Successfully\".",
+      "provisional": [
+        "BUG-005"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "instance": "QA",
+      "status": "New",
+      "classification": "app-defect",
+      "tests": [
+        "TC-HOME-012",
+        "TC-ABOUT-009"
+      ],
+      "executions": [
+        "EX-20261104-113334",
+        "EX-20261104-115909"
+      ],
+      "id": "DEF-010",
+      "module": "home",
+      "title": "Side-nav highlight is stale; follows stored menu index, not the URL",
+      "description": "BUG-006 reproduced in automation. The active item comes from stored selectedMenuIndex; after a direct load of /ABOUT_US the Notifications item is highlighted until a click.",
+      "testData": "Role: User; Chromium (Playwright build), desktop 1280x720 unless stated; URL https://sahyogagentweb.drutam.in:9634; logged in as the User role (no credential recorded). Direct URL load after having been on Notifications.",
+      "priority": "Medium",
+      "severity": "Major",
+      "type": "UI",
+      "signal": "assertion",
+      "evidence": [
+        "dashboard/data/runs/EX-20261104-113334/evidence/12-0-0-screenshot.png",
+        "dashboard/data/runs/EX-20261104-115909/evidence/9-0-0-screenshot.png",
+        "qa/04-exploratory/evidence/about-us/BUG-006_stale-nav-highlight.png"
+      ],
+      "steps": [
+        "1. Sign in and open Notifications.",
+        "2. Load /ABOUT_US directly.",
+        "3. Check the highlighted menu item."
+      ],
+      "expected": "About Us is highlighted.",
+      "actual": "Notifications is highlighted (TC-HOME-012 read \"Notifications\"; TC-ABOUT-009 read no active item).",
+      "provisional": [
+        "BUG-006"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "instance": "QA",
+      "status": "New",
+      "classification": "app-defect",
+      "tests": [],
+      "executions": [],
+      "id": "DEF-011",
+      "module": "home",
+      "title": "Sidebar state not reset: drawer stays open on mobile and desktop sidebar stays collapsed after resize",
+      "description": "BUG-007 (stage 4, manual only). On 390px the drawer stays open over content after choosing an item; localStorage isCollapsed keeps the desktop sidebar collapsed after resizing back to 1440.",
+      "testData": "Role: User; Chromium; viewports 390x844 and 1440 wide.",
+      "priority": "Low",
+      "severity": "Minor",
+      "type": "UI",
+      "signal": "assertion",
+      "evidence": [
+        "qa/04-exploratory/evidence/notifications/US002_AC-NOTIF-01_mobile-390.png"
+      ],
+      "steps": [
+        "1. Set viewport 390x844, open the drawer, choose Notifications.",
+        "2. Resize to 1440."
+      ],
+      "expected": "Drawer closes on selection; desktop layout restored.",
+      "actual": "Drawer stays open; sidebar stays collapsed.",
+      "provisional": [
+        "BUG-007"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "instance": "QA",
+      "status": "New",
+      "classification": "app-defect",
+      "tests": [
+        "TC-PROFILE-009"
+      ],
+      "executions": [
+        "EX-20261104-114312"
+      ],
+      "id": "DEF-012",
+      "module": "my-profile",
+      "title": "Mobile number on the profile has 8 digits",
+      "description": "BUG-009 reproduced in automation. TC-PROFILE-009 expects /^\\d{10}$/ and receives an 8-digit value. This may be bad test-account data rather than a formatting bug; filed as Low until the data owner confirms.",
+      "testData": "Role: User; Chromium (Playwright build), desktop 1280x720 unless stated; URL https://sahyogagentweb.drutam.in:9634; logged in as the User role (no credential recorded). Profile of the User role.",
+      "priority": "Low",
+      "severity": "Minor",
+      "type": "Validation",
+      "signal": "assertion",
+      "evidence": [
+        "dashboard/data/runs/EX-20261104-114312/evidence/10-0-0-screenshot.png",
+        "qa/04-exploratory/evidence/my-profile/US002_AC-PROFILE-01_mobile-390.png"
+      ],
+      "steps": [
+        "1. Sign in.",
+        "2. Open My Profile.",
+        "3. Read the Mobile Number."
+      ],
+      "expected": "10-digit mobile number.",
+      "actual": "8-digit value shown.",
+      "provisional": [
+        "BUG-009"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "instance": "QA",
+      "status": "New",
+      "classification": "app-defect",
+      "tests": [
+        "TC-NOTIF-030"
+      ],
+      "executions": [
+        "EX-20261104-115503"
+      ],
+      "id": "DEF-013",
+      "module": "notifications",
+      "title": "Paginator shows page 2 while rows stay on page 1 after a 500 on Next",
+      "description": "BUG-010 (stage 5). When POST /sahyogAosAPI/aos/app/notification/list returns 500 after clicking Next, the rows stay on page 1 but the paginator highlights page 2. The 500 was injected by the test; the defect is the state desync and the lack of any error message.",
+      "testData": "Role: User; Chromium (Playwright build), desktop 1280x720 unless stated; URL https://sahyogagentweb.drutam.in:9634; logged in as the User role (no credential recorded). The notification list request is forced to return 500 on the Next click.",
+      "priority": "Medium",
+      "severity": "Minor",
+      "type": "Functional",
+      "signal": "assertion",
+      "evidence": [
+        "dashboard/data/runs/EX-20261104-115503/evidence/30-0-0-screenshot.png"
+      ],
+      "steps": [
+        "1. Open Notifications.",
+        "2. Make notification/list return 500.",
+        "3. Click Next."
+      ],
+      "expected": "Indicator stays on page 1; a retry reaches page 2.",
+      "actual": "Rows on page 1, highlight on page 2.",
+      "provisional": [
+        "BUG-010"
+      ]
+    }
+  ],
+  "notDefects": [
+    {
+      "test": "TC-HOME-010",
+      "classification": "script",
+      "reason": "Missing wait while tab styles re-render; healed in src/pages/home.page.ts (stage 5). Passes now."
+    },
+    {
+      "test": "TC-PROFILE-011",
+      "classification": "script",
+      "reason": "Precondition incomplete: goto fired before re-login finished; healed in the spec arrange block."
+    },
+    {
+      "test": "TC-NOTIF-006",
+      "classification": "script",
+      "reason": "Missing wait for the row list to change after the page highlight moved; healed in notifications.page.ts."
+    },
+    {
+      "test": "TC-NOTIF-007",
+      "classification": "script",
+      "reason": "Ambiguous Next locator (3 matches); healed with exact: true."
+    },
+    {
+      "test": "TC-LOGIN-007..017, 029, 033",
+      "classification": "test-data",
+      "reason": "Web signals show POST oauth2/token 400 (14 events). These are the deliberate wrong-password / invalid-input cases; the UI shows a toast for each, so they are not swallowed errors. The wording difference is DEF-001."
+    },
+    {
+      "test": "TC-LOGIN-024, TC-HOME-020/025, TC-ABOUT-010, TC-PROFILE-015, TC-NOTIF-027",
+      "classification": "test-data",
+      "reason": "401 signals come from tests that clear the session on purpose; the app redirects to /login. Only the toast wording is filed (DEF-009)."
+    },
+    {
+      "test": "TC-LOGIN-035, TC-HOME-024, TC-NOTIF-029",
+      "classification": "test-data",
+      "reason": "500 responses were injected by the tests (route mocks). They are not server faults; the app handled them without crashing. TC-NOTIF-030 desync is DEF-013."
+    },
+    {
+      "test": "TC-LOGIN-034, TC-HOME-026, TC-NOTIF-031",
+      "classification": "environment",
+      "reason": "net::ERR_INTERNET_DISCONNECTED is the offline emulation used by these tests, not a real outage."
+    },
+    {
+      "test": "16 skipped tests",
+      "classification": "test-data",
+      "reason": "Skipped / fixme since stage 3 (e.g. TC-PROFILE-012, no profile endpoint identified; Mark All as Read not approved to run). Not failures."
+    },
+    {
+      "test": "Exploratory blocked cases (65)",
+      "classification": "environment",
+      "reason": "Stage 4 MCP session did not expose route, offline, axe and some tools. Covered later by automation. No defect raised."
+    }
+  ],
+  "notes": [
+    "No uncaught page errors, no failed requests (besides emulated offline), and no navigation over the 5 s threshold appeared in any final-run web-signals file.",
+    "The 4xx/5xx signals in passed tests were caused by the tests themselves (see notDefects); no unexplained 4xx or real 5xx was seen.",
+    "Final run per module used: login=EX-20261104-112238, home=EX-20261104-113334, about-us=EX-20261104-115909, my-profile=EX-20261104-114312, notifications=EX-20261104-115503.",
+    "Manual-only defects (DEF-007, 008, 009, 011) rest on stage 4 notes and screenshots, not on a failing automated assertion."
+  ]
+}

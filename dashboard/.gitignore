@@ -1,0 +1,6 @@
+# generated from tests/e2e by scripts/build-catalogue.mjs on every dev/build
+web/src/data/catalogue.json
+web/dist/
+# executions, evidence and dashboard defect changes: local, and they contain customer screens
+/data/
+*.tsbuildinfo

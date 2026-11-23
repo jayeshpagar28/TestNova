@@ -1,0 +1,27 @@
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+*.log
+.env
+.env.local
+.DS_Store
+.auth/
+.testnova/
+
+# single-use test data workbooks: real accounts, never commit
+test-data/
+
+# per-project uploads, pipeline state and credentials-adjacent material
+projects/*/
+projects/active.json
+
+# Excel lock files
+~$*
+
+# local MCP browser session logs and personal Claude settings
+.playwright-mcp/
+.claude/settings.local.json
+
+# unrelated local file
+AI_Transforming_the_World.pptx

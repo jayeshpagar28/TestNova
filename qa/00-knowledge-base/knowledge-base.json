@@ -1,0 +1,113 @@
+{
+  "project": { "id": "sahayog-e767", "name": "Sahayog", "url": "https://sahyogagentweb.drutam.in:9634/login", "environment": "QA", "generatedAt": "2026-11-04T12:00:00.000Z" },
+  "modules": [
+    {
+      "id": "login", "name": "Login", "icon": "LogIn", "order": 1,
+      "description": "Authentication (User Id + Password), validation messages, session creation and logout. Forgot Password / Forgot User ID / Activate Account links exist but their flows are unverified.",
+      "pages": [{ "name": "Login", "url": "/login", "source": "page: /login" }],
+      "roles": ["User"], "skip": false, "skipReason": null
+    },
+    {
+      "id": "home", "name": "Home", "icon": "LayoutDashboard", "order": 2,
+      "description": "Landing page after login: top bar with alerts/notification badges, side navigation, 'Alerts & Internal Updates' with All/Important tabs, and a 'Savings Application' button.",
+      "pages": [{ "name": "Home", "url": "/HOME", "source": "page: /HOME" }],
+      "roles": ["User"], "skip": false, "skipReason": null
+    },
+    {
+      "id": "about-us", "name": "About Us", "icon": "Info", "order": 3,
+      "description": "Static product information page (Key Capabilities, Powerful Features, Platform Benefits). Read-only.",
+      "pages": [{ "name": "About Us", "url": "/ABOUT_US", "source": "page: /ABOUT_US" }],
+      "roles": ["User"], "skip": false, "skipReason": null
+    },
+    {
+      "id": "my-profile", "name": "My Profile", "icon": "UserCircle", "order": 4,
+      "description": "Read-only profile of the signed-in user (name, gender, date of birth, mobile, email, address, role label).",
+      "pages": [{ "name": "My Profile", "url": "/MY_PROFILE", "source": "page: /MY_PROFILE" }],
+      "roles": ["User"], "skip": false, "skipReason": null
+    },
+    {
+      "id": "notifications", "name": "Notifications", "icon": "Bell", "order": 5,
+      "description": "Paged list of notifications (All / Unread tabs, page size 5, Mark All as Read). Mark All as Read changes real data and must not be run casually.",
+      "pages": [{ "name": "Notifications", "url": "/NOTIFICATIONS", "source": "page: /NOTIFICATIONS" }],
+      "roles": ["User"], "skip": false, "skipReason": null
+    }
+  ],
+  "roles": [
+    { "name": "User", "key": "", "permissions": ["Sign in (credentials via .env TEST_USERNAME / TEST_PASSWORD)", "See nav items Home, My Profile, Notifications, About Us", "View read-only profile", "View notifications and alerts", "Profile menu: My Profile, Change Password, Change Language, Logout"], "source": "project.json; page: /HOME" }
+  ],
+  "flows": [
+    { "id": "FLOW-LOGIN-01", "module": "login", "name": "Valid sign-in", "steps": ["Open /login", "Enter User Id and Password", "Click Login", "Land on /HOME"], "source": "page: /login, /HOME" },
+    { "id": "FLOW-LOGIN-02", "module": "login", "name": "Rejected sign-in", "steps": ["Enter wrong credentials", "Submit by Enter key", "Toast 'The credentials you entered are incorrect'", "Stay on /login"], "source": "page: /login" },
+    { "id": "FLOW-LOGIN-03", "module": "login", "name": "Logout", "steps": ["Click avatar", "Choose Logout", "Redirect to /login with toast 'Success: Logout Successfully'", "Open /HOME directly -> redirected to /login"], "source": "page" },
+    { "id": "FLOW-HOME-01", "module": "home", "name": "Side navigation", "steps": ["Click Home / My Profile / Notifications / About Us", "URL changes to /HOME, /MY_PROFILE, /NOTIFICATIONS, /ABOUT_US"], "source": "page: /HOME" },
+    { "id": "FLOW-HOME-02", "module": "home", "name": "Profile menu", "steps": ["Click avatar", "Menu lists name, My Profile, Change Password, Change Language, Logout"], "source": "page: /HOME" },
+    { "id": "FLOW-NOTIF-01", "module": "notifications", "name": "Page through notifications", "steps": ["Open /NOTIFICATIONS", "5 records shown", "Previous disabled on page 1", "Pages 1-4 ... and Next offered"], "source": "page: /NOTIFICATIONS" }
+  ],
+  "entities": [
+    { "name": "User session / token", "module": "login", "crud": { "create": "yes", "read": "unknown", "update": "unknown", "delete": "yes" }, "where": "oauth2/token on login; logout", "source": "page: /login network" },
+    { "name": "Alert / internal update", "module": "home", "crud": { "create": "unknown", "read": "yes", "update": "unknown", "delete": "unknown" }, "where": "/HOME Alerts & Internal Updates", "source": "page: /HOME" },
+    { "name": "User profile", "module": "my-profile", "crud": { "create": "no", "read": "yes", "update": "no", "delete": "no" }, "where": "/MY_PROFILE (all fields disabled)", "source": "page: /MY_PROFILE" },
+    { "name": "Notification", "module": "notifications", "crud": { "create": "unknown", "read": "yes", "update": "yes", "delete": "unknown" }, "where": "/NOTIFICATIONS (Mark All as Read seen, not executed)", "source": "page: /NOTIFICATIONS" },
+    { "name": "Savings Application", "module": "home", "crud": { "create": "unknown", "read": "unknown", "update": "unknown", "delete": "unknown" }, "where": "/HOME 'Savings Application' button, not clicked [NOT VERIFIED]", "source": "page: /HOME" }
+  ],
+  "businessRules": [
+    { "id": "BR-001", "module": "login", "rule": "User Id is mandatory (doc says Email).", "source": "doc: US_001_Login.md §8; page: /login", "verified": true },
+    { "id": "BR-002", "module": "login", "rule": "Password is mandatory.", "source": "doc §8; page: /login", "verified": true },
+    { "id": "BR-003", "module": "login", "rule": "Valid email format required for the identifier. [NOT VERIFIED] [CONFLICT] live label is 'User Id'.", "source": "doc §8, §9", "verified": false },
+    { "id": "BR-004", "module": "login", "rule": "Password is masked by default (verified from screenshot only; input type not read).", "source": "doc §8; page: login-password-filled.png", "verified": true },
+    { "id": "BR-005", "module": "login", "rule": "Authentication happens only after client validation passes. [NOT VERIFIED] inferred from no token call on blank submit.", "source": "doc §8; page: /login network", "verified": false },
+    { "id": "BR-006", "module": "login", "rule": "A session is created only after successful login (redirect to /HOME).", "source": "doc §8; page: /HOME", "verified": true },
+    { "id": "BR-007", "module": "login", "rule": "Unauthorized users cannot open protected pages; logout invalidates access (/HOME redirects to /login).", "source": "doc §8; page", "verified": true },
+    { "id": "BR-008", "module": "login", "rule": "Auth errors reveal no sensitive detail (single generic message). Partially verified.", "source": "doc §8; page: /login", "verified": true },
+    { "id": "BR-009", "module": "login", "rule": "Password is never logged. [NOT VERIFIED] only console checked, network payload not inspected.", "source": "doc §8", "verified": false },
+    { "id": "BR-010", "module": "login", "rule": "Enter key performs login.", "source": "doc §8; page: /login", "verified": true },
+    { "id": "BR-011", "module": "my-profile", "rule": "Profile fields are read-only.", "source": "page: /MY_PROFILE", "verified": true },
+    { "id": "BR-012", "module": "notifications", "rule": "Maximum 5 records per page by default; Previous disabled on page 1.", "source": "page: /NOTIFICATIONS", "verified": true }
+  ],
+  "validations": [
+    { "module": "login", "field": "User Id", "rule": "Required", "message": "Enter User Id", "source": "page: /login", "verified": true },
+    { "module": "login", "field": "Password", "rule": "Required", "message": "Enter password", "source": "page: /login", "verified": true },
+    { "module": "login", "field": "Credentials", "rule": "Must match a registered account", "message": "The credentials you entered are incorrect", "source": "page: /login", "verified": true },
+    { "module": "login", "field": "User Id", "rule": "Email format (doc only)", "message": "unknown", "source": "doc §9", "verified": false }
+  ],
+  "integrations": [
+    { "name": "Authentication service (/sahyogUserManagementAPI/oauth2/token)", "module": "login", "purpose": "Issues token on login; returns 400 on bad credentials", "source": "page: /login network" },
+    { "name": "Email Service", "module": "login", "purpose": "Forgot Password / User ID mail (not exercised) [NOT VERIFIED]", "source": "doc §3" },
+    { "name": "Side menu API (/admin/sidemenu/list)", "module": "home", "purpose": "Supplies role-based navigation", "source": "page: /HOME network" },
+    { "name": "Digilocker", "module": "notifications", "purpose": "Notifications reference Digilocker submissions", "source": "page: /NOTIFICATIONS" }
+  ],
+  "acceptanceCriteria": [
+    { "id": "AC-LOGIN-01", "module": "login", "text": "Clicking Login with both fields empty shows 'Enter User Id' and creates no session.", "type": "Functional", "source": "US_001 AC-1", "verified": true },
+    { "id": "AC-LOGIN-02", "module": "login", "text": "User Id filled and password empty shows 'Enter password'.", "type": "Functional", "source": "US_001 AC-2", "verified": true },
+    { "id": "AC-LOGIN-03", "module": "login", "text": "Wrong credentials via Enter key show toast 'The credentials you entered are incorrect', user stays on /login, message does not name the wrong field.", "type": "Business Rule", "source": "US_001 AC-3", "verified": true },
+    { "id": "AC-LOGIN-04", "module": "login", "text": "Valid credentials land the user on /HOME.", "type": "Functional", "source": "US_001 AC-4", "verified": true },
+    { "id": "AC-LOGIN-05", "module": "login", "text": "Logout returns to /login with toast and /HOME can no longer be opened directly.", "type": "Functional", "source": "US_001 AC-5", "verified": true },
+    { "id": "AC-LOGIN-06", "module": "login", "text": "Password field is masked (dots) after typing.", "type": "UI", "source": "US_001 AC-6", "verified": true },
+    { "id": "AC-HOME-01", "module": "home", "text": "Nav items change the URL to /HOME, /MY_PROFILE, /NOTIFICATIONS, /ABOUT_US.", "type": "Functional", "source": "US_002 AC-1", "verified": true },
+    { "id": "AC-HOME-02", "module": "home", "text": "Avatar menu lists My Profile, Change Password, Change Language, Logout.", "type": "UI", "source": "US_002 AC-4", "verified": true },
+    { "id": "AC-HOME-03", "module": "home", "text": "/HOME without a session redirects to /login.", "type": "Business Rule", "source": "US_002 AC-5; US_001 AC-5", "verified": true },
+    { "id": "AC-PROFILE-01", "module": "my-profile", "text": "Every profile field is disabled (not editable).", "type": "Functional", "source": "US_002 AC-2", "verified": true },
+    { "id": "AC-NOTIF-01", "module": "notifications", "text": "At most 5 records per page; Previous disabled on page 1.", "type": "Functional", "source": "US_002 AC-3", "verified": true }
+  ],
+  "glossary": [
+    { "term": "Sahayog / Drutam Origination", "meaning": "Customer onboarding and loan origination portal; page title 'Drutam Origination'.", "source": "page: /login, /ABOUT_US" },
+    { "term": "Branch Origination Officer", "meaning": "Role label shown on My Profile for the test User.", "source": "page: /MY_PROFILE" },
+    { "term": "Digilocker", "meaning": "Document service referenced in notification text.", "source": "page: /NOTIFICATIONS" },
+    { "term": "eKYC", "meaning": "Electronic know-your-customer capability listed on About Us.", "source": "page: /ABOUT_US" }
+  ],
+  "gaps": [
+    { "id": "GAP-001", "module": "login", "question": "Password visibility toggle behaviour and input type", "needed": "Permission for evaluate/coordinate-click tools or a rerun", "source": "US_001 GAP-1" },
+    { "id": "GAP-002", "module": "login", "question": "Forgot Password / Forgot User ID / Activate Account flows (Forgot Password click showed no change)", "needed": "Test mailbox and stakeholder sign-off; flows send real mail", "source": "US_001 GAP-2; OBS-4" },
+    { "id": "GAP-003", "module": "login", "question": "Locked/inactive account behaviour, password policy, session timeout length", "needed": "Such accounts and policy documentation", "source": "US_001 GAP-3" },
+    { "id": "GAP-004", "module": "login", "question": "Behaviour of other roles; only one role exists", "needed": "Credentials for other roles", "source": "US_001 GAP-4" },
+    { "id": "GAP-005", "module": "home", "question": "No requirements for Home, Profile, Notifications, About Us, Change Password, Change Language, Savings Application", "needed": "Stakeholder documents", "source": "US_002 GAP" },
+    { "id": "GAP-006", "module": "home", "question": "Meaning of Alerts badge vs Notification badge; Important tab; View All; Savings Application flow", "needed": "Documentation or safe test data", "source": "US_002 NOT VERIFIED" },
+    { "id": "GAP-007", "module": "notifications", "question": "Unread tab, page-size options, pages 2-4 and Mark All as Read effects", "needed": "Approval to change data (notifications reference real applicants)", "source": "US_002" },
+    { "id": "GAP-008", "module": "home", "question": "Change Password and Change Language were not opened", "needed": "Approval for a write action on the test account", "source": "US_002" },
+    { "id": "GAP-009", "module": "home", "question": "Home content appears inside a frame in the snapshot; cause unverified, locators may need frame handling", "needed": "Inspect DOM", "source": "US_002 observations" },
+    { "id": "GAP-010", "module": "login", "question": "[CONFLICT] Doc says 'Email ID' with email-format validation; live label is 'User Id' and no format error observed", "needed": "Stakeholder to decide which is correct", "source": "US_001 CONFLICT-1, 4" },
+    { "id": "GAP-011", "module": "login", "question": "[CONFLICT] Doc says login opens 'Dashboard'; live app opens /HOME", "needed": "Stakeholder confirmation", "source": "US_001 CONFLICT-2" },
+    { "id": "GAP-012", "module": "login", "question": "[CONFLICT] Doc lists only Forgot Password and a footer/copyright; live page also has Forgot User ID ?, Activate Account and no copyright seen", "needed": "Stakeholder confirmation", "source": "US_001 CONFLICT-3" },
+    { "id": "GAP-013", "module": "login", "question": "Security/edge cases untested: SQLi, XSS, long input, rapid clicks, offline, multi-tab, browser-back after logout, token storage, CSRF, responsive, Tab order", "needed": "Stage 4 exploratory testing", "source": "US_001 NOT VERIFIED" }
+  ]
+}
