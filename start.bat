@@ -83,13 +83,27 @@ if not exist .env (
 )
 
 REM ---- 6. Optional tools: warn only -----------------------------------------
-where claude >nul 2>&1
-if errorlevel 1 (
-  echo  [!] Claude Code CLI not found. The dashboard works, but the AI Pipeline needs it:
-  echo        npm install -g @anthropic-ai/claude-code
-  echo        claude      ^(sign in once^)
+REM The AI Pipeline's agents run on Claude: they need Claude Code's sign-in or an API key.
+set "CLAUDE_OK="
+if defined ANTHROPIC_API_KEY set "CLAUDE_OK=API key"
+if defined ANTHROPIC_AUTH_TOKEN set "CLAUDE_OK=auth token"
+if defined CLAUDE_CODE_OAUTH_TOKEN set "CLAUDE_OK=OAuth token"
+if defined CLAUDE_CODE_USE_BEDROCK set "CLAUDE_OK=Amazon Bedrock"
+if defined CLAUDE_CODE_USE_VERTEX set "CLAUDE_OK=Google Vertex AI"
+set "CLAUDE_DIR=%USERPROFILE%\.claude"
+if defined CLAUDE_CONFIG_DIR set "CLAUDE_DIR=%CLAUDE_CONFIG_DIR%"
+if exist "%CLAUDE_DIR%\.credentials.json" set "CLAUDE_OK=signed in"
+if defined CLAUDE_OK (
+  echo  [ok] Claude account connected ^(%CLAUDE_OK%^)
 ) else (
-  echo  [ok] Claude Code CLI found
+  echo.
+  echo  [!] Claude account NOT connected. The dashboard works, but the AI Pipeline needs it.
+  echo      Connect it once:
+  where claude >nul 2>&1
+  if errorlevel 1 echo        npm install -g @anthropic-ai/claude-code
+  echo        claude         ^(sign in with your Claude account, then type /exit^)
+  echo      Or set ANTHROPIC_API_KEY and run start.bat again. Details: README.md
+  echo.
 )
 set "CHROME="
 if exist "%ProgramFiles%\Google\Chrome\Application\chrome.exe" set "CHROME=1"

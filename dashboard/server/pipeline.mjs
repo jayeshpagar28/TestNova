@@ -408,6 +408,7 @@ export function view(state) {
     ...typed,
     testingTypeLabel: labelOf(testingType),
     pendingTestingType: started && wanted !== testingType ? { key: wanted, label: labelOf(wanted) } : null,
+    claude: claudeConnection(),
     stages: state.stages.map((s) => ({ ...s, ...pick(stageOf(typed, s.n)) })),
   };
 }
@@ -690,6 +691,45 @@ async function engine() {
     }
   }
   return sdkAvailable ? 'sdk' : 'cli';
+}
+
+/**
+ * Is a Claude account connected for the agents? The SDK and the CLI both use Claude Code's sign-in:
+ * an API key or token in the environment, a cloud provider (Bedrock, Vertex, Foundry), the saved
+ * sign-in of `claude` (.credentials.json), or a key in Claude Code's settings. connected is null
+ * when it cannot be told (macOS keeps the sign-in in the Keychain) or the check is turned off with
+ * TESTNOVA_SKIP_CLAUDE_CHECK=1: then nothing is blocked.
+ */
+export function claudeConnection() {
+  const env = process.env;
+  if (env.TESTNOVA_SKIP_CLAUDE_CHECK === '1') return { connected: null };
+  if (env.ANTHROPIC_API_KEY || env.ANTHROPIC_AUTH_TOKEN || env.CLAUDE_CODE_OAUTH_TOKEN) return { connected: true, via: 'environment' };
+  if (['CLAUDE_CODE_USE_BEDROCK', 'CLAUDE_CODE_USE_VERTEX', 'CLAUDE_CODE_USE_FOUNDRY'].some((k) => env[k] && env[k] !== '0')) return { connected: true, via: 'cloud' };
+  const base = env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude');
+  if (existsSync(join(base, '.credentials.json'))) return { connected: true, via: 'sign-in' };
+  try {
+    const s = JSON.parse(readFileSync(join(base, 'settings.json'), 'utf8'));
+    if (s.apiKeyHelper || s.env?.ANTHROPIC_API_KEY || s.env?.ANTHROPIC_AUTH_TOKEN || s.env?.CLAUDE_CODE_OAUTH_TOKEN) return { connected: true, via: 'settings' };
+  } catch {
+    // no settings, or not JSON
+  }
+  try {
+    if (readFileSync(join(homedir(), '.claude.json'), 'utf8').includes('"primaryApiKey"')) return { connected: true, via: 'sign-in' };
+  } catch {
+    // no file
+  }
+  if (process.platform === 'darwin') return { connected: null };
+  return { connected: false };
+}
+
+export const CLAUDE_NOT_CONNECTED = 'Claude is not connected, so the AI Pipeline\'s agents cannot run. Connect it once on this PC:\n'
+  + '1. Install Claude Code: npm install -g @anthropic-ai/claude-code\n'
+  + '2. Run claude in a terminal and sign in with your Claude account (then type /exit).\n'
+  + 'Or set ANTHROPIC_API_KEY to an API key and restart the dashboard. Then start the pipeline again.';
+
+/** Refuse to launch an agent when no Claude account is connected (before anything is changed). */
+function requireClaude() {
+  if (claudeConnection().connected === false) throw Object.assign(failure(CLAUDE_NOT_CONNECTED), { code: 'CLAUDE_NOT_CONNECTED' });
 }
 
 // ── orchestration ───────────────────────────────────────────────────────────
@@ -1023,6 +1063,7 @@ function switchTestingType(state, wanted) {
 export function startPipeline(id, { pauseForReview, switchTestingType: confirmSwitch, securityAuthorization, actor } = {}, apiBase) {
   if (running.has(id)) throw failure('This project\'s pipeline is already running.');
   requireProject(id);
+  requireClaude();
   const state = loadState(id);
   if (typeof pauseForReview === 'boolean') state.pauseForReview = pauseForReview;
   const wanted = projectView(id)?.testingType ?? null;
@@ -1061,6 +1102,7 @@ export function startPipeline(id, { pauseForReview, switchTestingType: confirmSw
 export function restartPipeline(id, opts, apiBase) {
   if (running.has(id)) throw failure('This project\'s pipeline is already running.');
   requireProject(id);
+  requireClaude();
   const prev = loadState(id);
   // a restart is a new run: a fresh authorization for Security Testing
   const state = freshState(id);
@@ -1095,6 +1137,7 @@ export function retryStage(id, n, apiBase, { fresh = false } = {}) {
   const state = requireProject(id);
   const s = state.stages[n - 1];
   if (!s) throw failure('Unknown stage', 404);
+  requireClaude();
   s.resumable = !fresh && RESUMABLE.has(s.status) && s.attempt > 0;
   if (!s.resumable) s.sessionId = null;
   const W = workspaceDir(id);
@@ -1127,6 +1170,7 @@ export function approveStage(id, n, apiBase) {
   const state = requireProject(id);
   const s = state.stages[n - 1];
   if (!s || s.status !== 'review') throw failure('This stage is not waiting for review.');
+  requireClaude();
   s.status = 'passed';
   drive(state, n + 1, apiBase).catch((e) => console.error('pipeline', e));
   return view(state);

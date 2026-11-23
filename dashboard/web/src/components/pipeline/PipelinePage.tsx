@@ -698,6 +698,21 @@ export function PipelinePage({ onMenu }: { onMenu: () => void }) {
             </div>
           )}
         </div>
+        {pipeline.claude?.connected === false && !running && (
+          <div role="status" className="flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-3 py-2.5 text-[12.5px] text-ink">
+            <TriangleAlert size={14} className="mt-0.5 shrink-0 text-warn" />
+            <div className="flex flex-col gap-1">
+              <span className="font-medium">Connect your Claude account to run the AI Pipeline</span>
+              <span className="text-ink-2">The pipeline's agents run on Claude. Everything else on the dashboard works without it. Connect it once on the PC that runs TestNova:</span>
+              <ol className="ml-4 list-decimal text-ink-2">
+                <li>Install Claude Code: <code className="text-ink">npm install -g @anthropic-ai/claude-code</code></li>
+                <li>Run <code className="text-ink">claude</code> in a terminal and sign in with your Claude account, then type <code className="text-ink">/exit</code>.</li>
+                <li>Start the pipeline. No restart is needed.</li>
+              </ol>
+              <span className="text-ink-3">Using an API key instead? Set <code>ANTHROPIC_API_KEY</code> and restart the dashboard.</span>
+            </div>
+          </div>
+        )}
         {pending && !running && (
           <p role="status" className="flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-3 py-2 text-[12.5px] text-ink">
             <TriangleAlert size={14} className="mt-0.5 shrink-0 text-warn" />

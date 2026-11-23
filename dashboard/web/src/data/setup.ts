@@ -85,6 +85,8 @@ export interface Pipeline {
   testingTypeLabel: string;
   /** The project's testing type was changed after this run started; Start offers the switch. */
   pendingTestingType?: { key: TestingType; label: string } | null;
+  /** Is a Claude account connected on the server's PC? null: it cannot be told, nothing is blocked. */
+  claude?: { connected: boolean | null; via?: string };
   /** Security Testing: who confirmed the authorization, when, and for what. */
   authorization?: { by: string; at: string; reference: string | null; scope: string; environment: string } | null;
 }
