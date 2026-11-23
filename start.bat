@@ -5,6 +5,7 @@ REM
 REM    start.bat              install whatever is missing, then start TestNova
 REM    start.bat --reinstall  reinstall all dependencies, then start
 REM
+REM  Requires Node.js 22.12+ (offers to install it with winget if missing).
 REM  Opens the dashboard at http://localhost:5180 (API on 127.0.0.1:5181).
 REM  Press Ctrl+C in this window to stop it.
 REM ==========================================================================
@@ -102,12 +103,14 @@ if not defined CHROME (
 )
 
 REM ---- 7. Start -------------------------------------------------------------
+REM TESTNOVA_WEB_PORT / TESTNOVA_PORT move the page / API; TESTNOVA_NO_OPEN=1 skips opening the browser.
+if not defined TESTNOVA_WEB_PORT set "TESTNOVA_WEB_PORT=5180"
 echo.
 echo  ==== Starting TestNova ====
-echo  Dashboard: http://localhost:5180     (Ctrl+C to stop)
+echo  Dashboard: http://localhost:%TESTNOVA_WEB_PORT%     (Ctrl+C to stop)
 echo.
 REM Open the browser once the page has had time to come up.
-start "" /b cmd /c "timeout /t 8 /nobreak >nul && start http://localhost:5180"
+if not defined TESTNOVA_NO_OPEN start "" /b cmd /c "timeout /t 8 /nobreak >nul && start http://localhost:%TESTNOVA_WEB_PORT%"
 call npm run dashboard
 goto :eof
 
